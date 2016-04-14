@@ -2,7 +2,8 @@
 //  GeoLocation.swift
 //
 //  Created by Brandon S. Kane on 4/10/16.
-//
+//  A Swift implementation of http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates#Java
+
 
 import Foundation
 
