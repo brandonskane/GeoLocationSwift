@@ -191,3 +191,13 @@ class GeoLocation {
         }
     }
 }
+
+extension Int {
+    var degreesToRadians: Double { return Double(self) * M_PI / 180 }
+    var radiansToDegrees: Double { return Double(self) * 180 / M_PI }
+}
+
+extension Double {
+    var degreesToRadians: Double { return self * M_PI / 180 }
+    var radiansToDegrees: Double { return self * 180 / M_PI }
+}
