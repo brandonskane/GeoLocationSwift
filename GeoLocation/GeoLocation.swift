@@ -15,23 +15,23 @@ class GeoLocation {
         case nilValue
     }
     
-    private var radLatitude: Double?
-    private var radLongitude: Double?
-    private var degLatitude: Double?
-    private var degLongitude: Double?
+    fileprivate var radLatitude: Double?
+    fileprivate var radLongitude: Double?
+    fileprivate var degLatitude: Double?
+    fileprivate var degLongitude: Double?
     
-    private let MinLatitude = -90.degreesToRadians // -PI/2
-    private let MaxLatitude = 90.degreesToRadians  // PI/2
-    private let MinLongitude = -180.degreesToRadians   // -PI
-    private let MaxLongitude = 180.degreesToRadians    // PI
+    fileprivate let MinLatitude = -90.degreesToRadians // -PI/2
+    fileprivate let MaxLatitude = 90.degreesToRadians  // PI/2
+    fileprivate let MinLongitude = -180.degreesToRadians   // -PI
+    fileprivate let MaxLongitude = 180.degreesToRadians    // PI
     
-    private let earthRadius = 6371.01
+    fileprivate let earthRadius = 6371.01
     
     /**
      * @param latitude the latitude, in degrees.
      * @param longitude the longitude, in degrees.
      */
-    class func fromDegrees(latitude: Double, longitude: Double) -> GeoLocation? {
+    class func fromDegrees(_ latitude: Double, longitude: Double) -> GeoLocation? {
         let result = GeoLocation()
         result.radLatitude = latitude.degreesToRadians
         result.radLongitude = longitude.degreesToRadians
@@ -53,7 +53,7 @@ class GeoLocation {
      * @param longitude the longitude, in radians.
      */
     
-    class func fromRadians(latitude: Double , longitude: Double) -> GeoLocation? {
+    class func fromRadians(_ latitude: Double , longitude: Double) -> GeoLocation? {
         let result = GeoLocation()
         result.radLatitude = latitude
         result.radLongitude = longitude
@@ -71,7 +71,7 @@ class GeoLocation {
         return nil
     }
     
-    private func checkBounds() throws {
+    fileprivate func checkBounds() throws {
         if radLatitude! < MinLatitude || radLatitude! > MaxLatitude || radLongitude! < MinLongitude || radLongitude! > MaxLongitude {
             throw GeoLocationError.invalidBound
         }
@@ -106,7 +106,7 @@ class GeoLocation {
     }
     
     var description: String {
-        return "\(degLatitude)°, \(degLongitude)° = \(radLatitude) rad, \(radLongitude) rad"
+        return "\(String(describing: degLatitude))°, \(String(describing: degLongitude))° = \(String(describing: radLatitude)) rad, \(String(describing: radLongitude)) rad"
     }
     
     /**
@@ -119,7 +119,7 @@ class GeoLocation {
      * argument.
      */
     
-    func distanceTo(location: GeoLocation) -> Double? {
+    func distanceTo(_ location: GeoLocation) -> Double? {
         guard let radLatitude = radLatitude,
             let locationRatLatitude = location.radLatitude,
             let radLongitude = radLongitude,
@@ -149,7 +149,7 @@ class GeoLocation {
      represents the bounding box.
      */
     
-    func boundingCoordinates(distance: Double) throws -> [GeoLocation] {
+    func boundingCoordinates(_ distance: Double) throws -> [GeoLocation] {
         guard let radLatitude = radLatitude,
             let radLongitude = radLongitude
             else { throw GeoLocationError.nilValue }
@@ -171,9 +171,9 @@ class GeoLocation {
             let deltaLon = asin(sin(radDist) / cos(radLatitude))
             minLon = radLongitude - deltaLon
             
-            if minLon < MinLongitude { minLon += 2 * M_PI }
+            if minLon < MinLongitude { minLon += 2 * .pi }
             maxLon = radLongitude + deltaLon
-            if maxLon > MaxLongitude { maxLon -= 2 * M_PI }
+            if maxLon > MaxLongitude { maxLon -= 2 * .pi }
         }
         else {
             minLat = max(minLat, MinLatitude)
@@ -182,8 +182,8 @@ class GeoLocation {
             maxLon = MaxLongitude
         }
         
-        if let location1 = GeoLocation.fromRadians(latitude: minLat, longitude: minLon),
-            let location2 = GeoLocation.fromRadians(latitude: maxLat, longitude: maxLon) {
+        if let location1 = GeoLocation.fromRadians(minLat, longitude: minLon),
+            let location2 = GeoLocation.fromRadians(maxLat, longitude: maxLon) {
             return [location1, location2]
         }
         else {
@@ -193,11 +193,11 @@ class GeoLocation {
 }
 
 extension Int {
-    var degreesToRadians: Double { return Double(self) * M_PI / 180 }
-    var radiansToDegrees: Double { return Double(self) * 180 / M_PI }
+    var degreesToRadians: Double { return Double(self) * .pi / 180 }
+    var radiansToDegrees: Double { return Double(self) * 180 / .pi }
 }
 
 extension Double {
-    var degreesToRadians: Double { return self * M_PI / 180 }
-    var radiansToDegrees: Double { return self * 180 / M_PI }
+    var degreesToRadians: Double { return self * .pi / 180 }
+    var radiansToDegrees: Double { return self * 180 / .pi }
 }

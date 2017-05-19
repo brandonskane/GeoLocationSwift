@@ -99,7 +99,7 @@
 					660399741E5D37F100166EB8 = {
 						CreatedOnToolsVersion = 8.2.1;
 						DevelopmentTeam = U89TQVVL6R;
-						LastSwiftMigration = 0820;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -302,6 +302,7 @@
 				6603997F1E5D37F100166EB8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
