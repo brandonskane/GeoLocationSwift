@@ -2,6 +2,7 @@
 //  GeoLocation.swift
 //
 //  Created by Brandon S. Kane on 2/21/17.
+//  Modified by Imri S. Goldberg on 2018-11-01
 //  A Swift implementation of http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates#Java
 
 
@@ -15,94 +16,62 @@ class GeoLocation {
         case nilValue
     }
     
-    fileprivate var radLatitude: Double?
-    fileprivate var radLongitude: Double?
-    fileprivate var degLatitude: Double?
-    fileprivate var degLongitude: Double?
+    let radLatitude: Double
+    let radLongitude: Double
+    let degLatitude: Double
+    let degLongitude: Double
     
-    fileprivate let MinLatitude = -90.degreesToRadians // -PI/2
-    fileprivate let MaxLatitude = 90.degreesToRadians  // PI/2
-    fileprivate let MinLongitude = -180.degreesToRadians   // -PI
-    fileprivate let MaxLongitude = 180.degreesToRadians    // PI
+    let MinLatitude = -90.degreesToRadians // -PI/2
+    let MaxLatitude = 90.degreesToRadians  // PI/2
+    let MinLongitude = -180.degreesToRadians   // -PI
+    let MaxLongitude = 180.degreesToRadians    // PI
     
-    fileprivate let earthRadius = 6371.01
+    let earthRadius = 6371.01
+    
+    init(degLatitude: Double, degLongitude: Double) throws {
+        self.radLatitude = degLatitude.degreesToRadians
+        self.radLongitude = degLongitude.degreesToRadians
+        self.degLatitude = degLatitude
+        self.degLongitude = degLongitude
+        
+        try self.checkBounds()
+    }
+    
+    init(radLatitude: Double, radLongitude: Double) throws {
+        self.radLatitude = radLatitude
+        self.radLongitude = radLongitude
+        self.degLatitude = radLatitude.radiansToDegrees
+        self.degLongitude = radLongitude.radiansToDegrees
+        
+        try self.checkBounds()
+    }
     
     /**
      * @param latitude the latitude, in degrees.
      * @param longitude the longitude, in degrees.
      */
-    class func fromDegrees(_ latitude: Double, longitude: Double) -> GeoLocation? {
-        let result = GeoLocation()
-        result.radLatitude = latitude.degreesToRadians
-        result.radLongitude = longitude.degreesToRadians
-        result.degLatitude = latitude
-        result.degLongitude = longitude
-        
-        do {
-            try result.checkBounds()
-            return result
-        } catch {
-            print("GeoLocationError.InvalidBound")
+    class func fromDegrees(_ latitude: Double, _ longitude: Double) -> GeoLocation? {
+        guard let result = try? GeoLocation(degLatitude: latitude, degLongitude: longitude) else {
+            return nil
         }
-        
-        return nil
+        return result
     }
     
     /**
      * @param latitude the latitude, in radians.
      * @param longitude the longitude, in radians.
      */
-    
     class func fromRadians(_ latitude: Double , longitude: Double) -> GeoLocation? {
-        let result = GeoLocation()
-        result.radLatitude = latitude
-        result.radLongitude = longitude
-        
-        result.degLatitude = latitude.radiansToDegrees
-        result.degLongitude = longitude.radiansToDegrees
-        
-        do {
-            try result.checkBounds()
-            return result
-        } catch {
-            print("GeoLocationError.InvalidBound")
+        guard let result = try? GeoLocation(radLatitude: latitude, radLongitude: longitude) else {
+            return nil
         }
-        
-        return nil
+        return result
     }
     
     fileprivate func checkBounds() throws {
-        if radLatitude! < MinLatitude || radLatitude! > MaxLatitude || radLongitude! < MinLongitude || radLongitude! > MaxLongitude {
+        if radLatitude < MinLatitude || radLatitude > MaxLatitude || radLongitude < MinLongitude || radLongitude > MaxLongitude {
             throw GeoLocationError.invalidBound
         }
-    }
-    
-    /**
-     * @return the latitude, in degrees.
-     */
-    func getLatitudeInDegree() -> Double? {
-        return degLatitude ?? nil
-    }
-    
-    /**
-     * @return the longitude, in degrees.
-     */
-    func getLongitudeInDegrees() -> Double? {
-        return degLongitude ?? nil
-    }
-    
-    /**
-     * @return the latitude, in radians.
-     */
-    func getLatitudeInRadians() -> Double? {
-        return radLatitude ?? nil
-    }
-    
-    /**
-     * @return the longitude, in radians.
-     */
-    func getLongitudeInRadians() -> Double? {
-        return radLongitude ?? nil
     }
     
     var description: String {
@@ -119,20 +88,10 @@ class GeoLocation {
      * argument.
      */
     
-    func distanceTo(_ location: GeoLocation) -> Double? {
-        guard let radLatitude = radLatitude,
-            let locationRatLatitude = location.radLatitude,
-            let radLongitude = radLongitude,
-            let locationRatLongitude = location.radLongitude
-            else {
-                print("distanceTo Error: Some value is nil")
-                return nil
-        }
-        
-        
-        return acos(sin(radLatitude) * sin(locationRatLatitude) +
-            cos(radLatitude) * cos(location.radLatitude!) *
-            cos(radLongitude - locationRatLongitude)) * earthRadius
+    func distanceTo(_ location: GeoLocation) -> Double {
+        return acos(sin(radLatitude) * sin(location.radLatitude) +
+            cos(radLatitude) * cos(location.radLatitude) *
+            cos(radLongitude - location.radLongitude)) * earthRadius
     }
     
     /**
@@ -149,11 +108,7 @@ class GeoLocation {
      represents the bounding box.
      */
     
-    func boundingCoordinates(_ distance: Double) throws -> [GeoLocation] {
-        guard let radLatitude = radLatitude,
-            let radLongitude = radLongitude
-            else { throw GeoLocationError.nilValue }
-        
+    func boundingCoordinates(_ distance: Double) throws -> (GeoLocation, GeoLocation) {
         if distance < 0.0 {
             throw GeoLocationError.invalidArgument
         }
@@ -177,17 +132,16 @@ class GeoLocation {
         }
         else {
             minLat = max(minLat, MinLatitude)
-            maxLat = max(maxLat, MaxLatitude)
+            maxLat = min(maxLat, MaxLatitude)
             minLon = MinLongitude
             maxLon = MaxLongitude
         }
         
         if let location1 = GeoLocation.fromRadians(minLat, longitude: minLon),
             let location2 = GeoLocation.fromRadians(maxLat, longitude: maxLon) {
-            return [location1, location2]
-        }
-        else {
-            return []
+            return (location1, location2)
+        } else {
+            throw GeoLocationError.nilValue
         }
     }
 }
