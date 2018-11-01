@@ -117,10 +117,10 @@ class GeoLocation {
         
         let radDist = distance / earthRadius
         
-        var minLat:Double = radLatitude - radDist
-        var maxLat:Double = radLatitude + radDist
+        var minLat: Double = radLatitude - radDist
+        var maxLat: Double = radLatitude + radDist
         
-        var minLon:Double, maxLon:Double
+        var minLon: Double, maxLon: Double
         
         if minLat > MinLatitude && maxLat < MaxLatitude {
             let deltaLon = asin(sin(radDist) / cos(radLatitude))
