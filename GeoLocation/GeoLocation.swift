@@ -132,7 +132,7 @@ class GeoLocation {
         }
         else {
             minLat = max(minLat, MinLatitude)
-            maxLat = max(maxLat, MaxLatitude)
+            maxLat = min(maxLat, MaxLatitude)
             minLon = MinLongitude
             maxLon = MaxLongitude
         }
